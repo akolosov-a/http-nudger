@@ -1,2 +1,6 @@
 .mypy_cache
 *.pem
+__pycache__
+*.egg-info
+.tox
+.coverage
