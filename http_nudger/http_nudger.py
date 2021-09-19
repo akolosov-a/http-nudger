@@ -5,6 +5,7 @@ import click
 
 from ._version import __version__
 from .monitor import monitor_loop
+from .persister import persister_loop
 
 logger = logging.getLogger(__name__)
 
@@ -90,5 +91,87 @@ def monitor(
             kafka_key,
             kafka_cert,
             kafka_ca,
+        )
+    )
+
+
+@cli.command()
+@click.option(
+    "--kafka-bootstrap-servers",
+    type=click.STRING,
+    help="Kafka bootstrap servers list",
+    required=True,
+)
+@click.option(
+    "--kafka-topic",
+    type=click.STRING,
+    help="Kafka topic",
+    required=True,
+)
+@click.option(
+    "--kafka-key",
+    type=click.Path(exists=True),
+    help="Kafka access key file",
+    required=True,
+)
+@click.option(
+    "--kafka-cert",
+    type=click.Path(exists=True),
+    help="Kafka access certificate file",
+    required=True,
+)
+@click.option(
+    "--kafka-ca",
+    type=click.Path(exists=True),
+    help="Kafka root CA cert file",
+    required=True,
+)
+@click.option(
+    "--postgres-host", type=click.STRING, help="Postgres hostname", default="localhost"
+)
+@click.option("--postgres-port", type=click.INT, help="Postgres port", default=5432)
+@click.option(
+    "--postgres-key",
+    type=click.Path(exists=True),
+    help="Postgres access key",
+    required=True,
+)
+@click.option(
+    "--postgres-cert",
+    type=click.Path(exists=True),
+    help="Postgres access certificate file",
+    required=True,
+)
+@click.option(
+    "--postgres-ca",
+    type=click.Path(exists=True),
+    help="Postgres root CA cert file",
+    required=True,
+)
+def persister(
+    kafka_bootstrap_servers,
+    kafka_topic,
+    kafka_key,
+    kafka_cert,
+    kafka_ca,
+    postgres_host,
+    postgres_port,
+    postgres_key,
+    postgres_cert,
+    postgres_ca,
+):
+    """Run process for storing URL checks to the given database tables"""
+    asyncio.run(
+        persister_loop(
+            kafka_bootstrap_servers,
+            kafka_topic,
+            kafka_key,
+            kafka_cert,
+            kafka_ca,
+            postgres_host,
+            postgres_port,
+            postgres_key,
+            postgres_cert,
+            postgres_ca,
         )
     )
