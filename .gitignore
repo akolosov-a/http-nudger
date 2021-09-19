@@ -4,3 +4,7 @@ __pycache__
 *.egg-info
 .tox
 .coverage
+.terraform
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
