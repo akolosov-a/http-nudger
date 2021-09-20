@@ -68,31 +68,9 @@ def cli(debug):
     required=True,
 )
 # pylint: disable-msg=too-many-arguments
-def monitor(
-    url,
-    period,
-    timeout,
-    regexp,
-    kafka_bootstrap_servers,
-    kafka_topic,
-    kafka_key,
-    kafka_cert,
-    kafka_ca,
-):
+def monitor(**kwargs):
     """Run monitoring for the specified URL"""
-    asyncio.run(
-        monitor_loop(
-            url,
-            period,
-            timeout,
-            regexp,
-            kafka_bootstrap_servers,
-            kafka_topic,
-            kafka_key,
-            kafka_cert,
-            kafka_ca,
-        )
-    )
+    asyncio.run(monitor_loop(**kwargs))
 
 
 @cli.command()
@@ -148,30 +126,6 @@ def monitor(
     help="Postgres root CA cert file",
     required=True,
 )
-def persister(
-    kafka_bootstrap_servers,
-    kafka_topic,
-    kafka_key,
-    kafka_cert,
-    kafka_ca,
-    postgres_host,
-    postgres_port,
-    postgres_key,
-    postgres_cert,
-    postgres_ca,
-):
+def persister(**kwargs):
     """Run process for storing URL checks to the given database tables"""
-    asyncio.run(
-        persister_loop(
-            kafka_bootstrap_servers,
-            kafka_topic,
-            kafka_key,
-            kafka_cert,
-            kafka_ca,
-            postgres_host,
-            postgres_port,
-            postgres_key,
-            postgres_cert,
-            postgres_ca,
-        )
-    )
+    asyncio.run(persister_loop(**kwargs))

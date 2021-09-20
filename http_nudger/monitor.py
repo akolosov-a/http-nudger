@@ -22,16 +22,16 @@ async def monitor_loop(
     regexp: re.Pattern,
     kafka_bootstrap_servers: str,
     kafka_topic: str,
-    kafka_key_file: Path,
-    kafka_cert_file: Path,
-    kafka_ca_file: Path,
+    kafka_key: Path,
+    kafka_cert: Path,
+    kafka_ca: Path,
 ):
     url_status_queue: asyncio.Queue = asyncio.Queue()
     kafka_producer = create_kafka_producer(
         kafka_bootstrap_servers,
-        kafka_key_file,
-        kafka_cert_file,
-        kafka_ca_file,
+        kafka_key,
+        kafka_cert,
+        kafka_ca,
     )
     await kafka_producer.start()
 
