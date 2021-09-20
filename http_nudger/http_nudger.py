@@ -105,6 +105,12 @@ def monitor(**kwargs):
     required=True,
 )
 @click.option(
+    "--kafka-consumer-group",
+    type=click.STRING,
+    help="Kafka consumer group to join",
+    default="http-nudger-url-statuses"
+)
+@click.option(
     "--postgres-host", type=click.STRING, help="Postgres hostname", default="localhost"
 )
 @click.option("--postgres-port", type=click.INT, help="Postgres port", default=5432)

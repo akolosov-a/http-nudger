@@ -1,6 +1,7 @@
 import json
 from dataclasses import asdict, dataclass
 from time import strftime, strptime, struct_time
+from typing import AnyStr
 
 URL_CHECK_TIMESTAMP_FORMAT = "%a, %d %b %Y %H:%M:%S %Z"
 
@@ -20,7 +21,7 @@ class UrlStatus:
         return json.dumps(json_dict)
 
     @staticmethod
-    def from_json(json_str: str):
+    def from_json(json_str: AnyStr):
         json_dict = json.loads(json_str)
         json_dict["timestamp"] = strptime(
             json_dict["timestamp"], URL_CHECK_TIMESTAMP_FORMAT
