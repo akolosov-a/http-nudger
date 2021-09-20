@@ -28,6 +28,10 @@ async def persister_loop(
         kafka_ca,
     )
 
+    pg_con = await create_postgres_connection(
+        postgres_host, postgres_port, postgres_db, postgres_user, postgres_password
+    )
+
     try:
         await kafka_consumer.start()
         kafka_consumer.subscribe(topics=[kafka_topic])
@@ -42,6 +46,15 @@ async def persister_loop(
                     msg.timestamp,
                 )
             )
+            # logger.debug(
+            #     "%s:%d:%d: key=%s value=%s timestamp_ms=%s",
+            #     msg.topic,
+            #     msg.partition,
+            #     msg.offset,
+            #     msg.key,
+            #     msg.value,
+            #     msg.timestamp,
+            # )
             url_status = UrlStatus.from_json(msg.value)
             print(url_status)
 

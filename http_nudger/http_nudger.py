@@ -115,21 +115,21 @@ def monitor(**kwargs):
 )
 @click.option("--postgres-port", type=click.INT, help="Postgres port", default=5432)
 @click.option(
-    "--postgres-key",
-    type=click.Path(exists=True),
-    help="Postgres access key",
+    "--postgres-db",
+    type=click.STRING,
+    help="Postgres database",
     required=True,
 )
 @click.option(
-    "--postgres-cert",
-    type=click.Path(exists=True),
-    help="Postgres access certificate file",
+    "--postgres-user",
+    type=click.STRING,
+    help="Postgres username",
     required=True,
 )
 @click.option(
-    "--postgres-ca",
-    type=click.Path(exists=True),
-    help="Postgres root CA cert file",
+    "--postgres-password",
+    type=click.STRING,
+    help="Postgres password",
     required=True,
 )
 def persister(**kwargs):

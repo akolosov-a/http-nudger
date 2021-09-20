@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from aiokafka import AIOKafkaProducer, AIOKafkaConsumer
+import asyncpg
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from aiokafka.helpers import create_ssl_context
 
 
@@ -38,4 +39,11 @@ def create_kafka_consumer(
         auto_offset_reset="earliest",
         group_id=consumer_group,
     )
+
+
+async def create_postgres_connection(
+    host: str, port: int, db: str, user: str, password: str
+):
+    return await asyncpg.connect(
+        user=user, password=password, database=db, host=host, port=port
     )
