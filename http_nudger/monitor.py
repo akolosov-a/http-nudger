@@ -63,10 +63,11 @@ async def url_status_checker(
 def url_check(url: str, timeout: int, regexp: re.Pattern) -> UrlStatus:
     timestamp = gmtime()
     request_failure = None
+    resp = None
 
     start_cnt = perf_counter()
     try:
-        r = requests.get(url, timeout=timeout)
+        resp = requests.get(url, timeout=timeout)
     except RequestException as ex:
         request_failure = ex
     exec_time = perf_counter() - start_cnt
@@ -74,7 +75,7 @@ def url_check(url: str, timeout: int, regexp: re.Pattern) -> UrlStatus:
     url_status = UrlStatus(
         timestamp,
         url,
-        r.status_code,
+        resp.status_code if resp else -1,
         str(request_failure),
         exec_time,
         False,  # TODO: regex matching
