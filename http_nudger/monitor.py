@@ -3,6 +3,7 @@ import logging
 import re
 from pathlib import Path
 from time import gmtime, perf_counter
+from typing import Optional
 
 import requests
 from aiokafka import AIOKafkaProducer
@@ -19,7 +20,7 @@ async def monitor_loop(
     url: str,
     period: int,
     timeout: int,
-    regexp: re.Pattern,
+    regexp: Optional[re.Pattern],
     kafka_bootstrap_servers: str,
     kafka_topic: str,
     kafka_key: Path,
@@ -27,29 +28,27 @@ async def monitor_loop(
     kafka_ca: Path,
 ):
     url_status_queue: asyncio.Queue = asyncio.Queue()
-    kafka_producer = create_kafka_producer(
+    async with create_kafka_producer(
         kafka_bootstrap_servers,
         kafka_key,
         kafka_cert,
         kafka_ca,
-    )
-    await kafka_producer.start()
-
-    checker_task = asyncio.create_task(
-        url_status_checker(url, period, timeout, regexp, url_status_queue)
-    )
-    producer_task = asyncio.create_task(
-        url_status_producer(kafka_producer, kafka_topic, url_status_queue)
-    )
-
-    try:
+    ) as kafka_producer:
+        checker_task = asyncio.create_task(
+            url_status_checker(url, period, timeout, regexp, url_status_queue)
+        )
+        producer_task = asyncio.create_task(
+            url_status_producer(kafka_producer, kafka_topic, url_status_queue)
+        )
         await asyncio.gather(checker_task, producer_task)
-    finally:
-        await kafka_producer.stop()
 
 
 async def url_status_checker(
-    url: str, period: int, timeout: int, regexp: re.Pattern, queue: asyncio.Queue
+    url: str,
+    period: int,
+    timeout: int,
+    regexp: Optional[re.Pattern],
+    queue: asyncio.Queue,
 ):
     while True:
         logger.info("Checking URL %s...", url)
@@ -60,25 +59,29 @@ async def url_status_checker(
         await asyncio.sleep(period)
 
 
-def url_check(url: str, timeout: int, regexp: re.Pattern) -> UrlStatus:
+def url_check(url: str, timeout: int, regexp: Optional[re.Pattern]) -> UrlStatus:
     timestamp = gmtime()
-    request_failure = None
     resp = None
-
+    request_failure = None
+    regexp_str = regexp.pattern if regexp else None
+    regexp_matched = False
     start_cnt = perf_counter()
     try:
         resp = requests.get(url, timeout=timeout)
+        if regexp:
+            regexp_matched = bool(regexp.search(resp.text))
     except RequestException as ex:
-        request_failure = ex
+        request_failure = str(ex)
     exec_time = perf_counter() - start_cnt
 
     url_status = UrlStatus(
         timestamp,
         url,
         resp.status_code if resp else -1,
-        str(request_failure),
+        request_failure,
         exec_time,
-        False,  # TODO: regex matching
+        regexp_str,
+        regexp_matched,
     )
 
     return url_status

@@ -1,35 +1,71 @@
-from http_nudger.monitor import url_check
-from unittest.mock import patch
+import re
 from time import gmtime
+from unittest.mock import patch
+
+import pytest
 from requests import Response
 from requests.exceptions import RequestException
 
+from http_nudger.monitor import url_check
 
-def test_url_check():
-    now = gmtime()
-    url = "https://google.com"
-    timeout = 5
+NOW = gmtime()
+URL = "https://google.com"
 
-    with patch("requests.get") as requests_get_mock, patch(
-        "time.gmtime"
-    ) as gmtime_mock:
-        gmtime_mock.return_value = now
 
-        resp = Response()
-        resp.status_code = 200
-        requests_get_mock.return_value = resp
+@pytest.fixture
+def http_response():
+    resp = Response()
+    resp.status_code = 200
+    resp._content = b"ABC123"
+    return resp
 
-        # Successful request
-        url_status = url_check(url, timeout, None)
-        assert url_status.timestamp == now
-        assert url_status.url == url
-        assert url_status.status_code == 200
-        assert url_status.failure_reason == "None"
 
-        # Failed request
-        requests_get_mock.side_effect = RequestException("Some reason")
-        url_status = url_check(url, timeout, None)
-        assert url_status.timestamp == now
-        assert url_status.url == url
-        assert url_status.status_code == -1
-        assert url_status.failure_reason == "Some reason"
+@patch("time.gmtime", return_value=NOW)
+@patch("requests.get")
+def test_url_check(requests_get_mock, _, http_response):
+    requests_get_mock.return_value = http_response
+    url_status = url_check(URL, 5, None)
+    assert url_status.timestamp == NOW
+    assert url_status.url == URL
+    assert url_status.status_code == http_response.status_code
+    assert url_status.failure_reason is None
+    assert url_status.regexp is None
+    assert url_status.regexp_matched is False
+
+    requests_get_mock.side_effect = RequestException("Some reason")
+    url_status = url_check(URL, 5, None)
+    assert url_status.timestamp == NOW
+    assert url_status.url == URL
+    assert url_status.status_code == -1
+    assert url_status.failure_reason == "Some reason"
+    assert url_status.regexp is None
+    assert url_status.regexp_matched is False
+
+
+@patch("requests.get")
+def test_url_check_regexp_match(requests_get_mock, http_response):
+    regexp = re.compile("[0-9]+")
+
+    requests_get_mock.return_value = http_response
+    url_status = url_check(URL, 5, regexp)
+    assert url_status.regexp == regexp.pattern
+    assert url_status.regexp_matched is True
+
+    requests_get_mock.side_effect = RequestException("Some reason")
+    url_status = url_check(URL, 5, regexp)
+    assert url_status.regexp == regexp.pattern
+    assert url_status.regexp_matched is False
+
+@patch("requests.get")
+def test_url_check_regexp_not_match(requests_get_mock, http_response):
+    regexp = re.compile("DEF?")
+
+    requests_get_mock.return_value = http_response
+    url_status = url_check(URL, 5, regexp)
+    assert url_status.regexp == regexp.pattern
+    assert url_status.regexp_matched is False
+
+    requests_get_mock.side_effect = RequestException("Some reason")
+    url_status = url_check(URL, 5, regexp)
+    assert url_status.regexp == regexp.pattern
+    assert url_status.regexp_matched is False

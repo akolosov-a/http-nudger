@@ -1,7 +1,7 @@
 import json
 from dataclasses import asdict, dataclass
 from time import strftime, strptime, struct_time
-from typing import AnyStr
+from typing import AnyStr, Optional
 
 URL_CHECK_TIMESTAMP_FORMAT = "%a, %d %b %Y %H:%M:%S %Z"
 
@@ -11,9 +11,10 @@ class UrlStatus:
     timestamp: struct_time
     url: str
     status_code: int
-    failure_reason: str
+    failure_reason: Optional[str]
     response_time: float
-    regexp_match: bool
+    regexp: Optional[str]
+    regexp_matched: bool
 
     def to_json(self) -> str:
         json_dict = asdict(self)

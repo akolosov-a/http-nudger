@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import re
 
 import click
 
@@ -20,6 +21,16 @@ def cli(debug):
     )
 
 
+def compile_regexp(ctx, param, value) -> re.Pattern:
+    if not value:
+        return None
+
+    try:
+        return re.compile(value)
+    except re.error as ex:
+        raise click.UsageError(f"Failed to parse given regexp: {ex}")
+
+
 @cli.command()
 @click.argument("url", type=click.STRING, nargs=1)
 @click.option(
@@ -36,7 +47,11 @@ def cli(debug):
     show_default=True,
     help="Timeout for an HTTP request (seconds)",
 )
-@click.option("--regexp", type=click.STRING, default="")
+@click.option(
+    "--regexp",
+    callback=compile_regexp,
+    help="Regular expression to search for in the response body",
+)
 @click.option(
     "--kafka-bootstrap-servers",
     type=click.STRING,
@@ -108,7 +123,7 @@ def monitor(**kwargs):
     "--kafka-consumer-group",
     type=click.STRING,
     help="Kafka consumer group to join",
-    default="http-nudger-url-statuses"
+    default="http-nudger-url-statuses",
 )
 @click.option(
     "--postgres-host", type=click.STRING, help="Postgres hostname", default="localhost"
