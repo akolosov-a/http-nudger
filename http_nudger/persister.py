@@ -1,7 +1,16 @@
+"""
+Persister module contains part of the http-nudger which consumes
+records from Kafka and stores them into the database
+"""
+import json
 import logging
 from pathlib import Path
+from typing import List
 
-from .helpers import create_kafka_consumer, create_postgres_connection
+import aiokafka
+import asyncpg
+
+from .helpers import create_kafka_consumer, create_postgres_connection_pool
 from .url_status import UrlStatus
 
 logger = logging.getLogger(__name__)
@@ -27,37 +36,32 @@ async def persister_loop(
         kafka_cert,
         kafka_ca,
     )
-
-    pg_con = await create_postgres_connection(
+    pg_conn_pool = await create_postgres_connection_pool(
         postgres_host, postgres_port, postgres_db, postgres_user, postgres_password
     )
-
-    try:
-        await kafka_consumer.start()
+    async with kafka_consumer as kafka_consumer, pg_conn_pool.acquire() as pg_conn:
         kafka_consumer.subscribe(topics=[kafka_topic])
-        async for msg in kafka_consumer:
-            print(
-                "{}:{:d}:{:d}: key={} value={} timestamp_ms={}".format(
-                    msg.topic,
-                    msg.partition,
-                    msg.offset,
-                    msg.key,
-                    msg.value,
-                    msg.timestamp,
-                )
-            )
-            # logger.debug(
-            #     "%s:%d:%d: key=%s value=%s timestamp_ms=%s",
-            #     msg.topic,
-            #     msg.partition,
-            #     msg.offset,
-            #     msg.key,
-            #     msg.value,
-            #     msg.timestamp,
-            # )
-            url_status = UrlStatus.from_json(msg.value)
-            print(url_status)
+        while True:
+            batch = await consume_batch(kafka_consumer)
+            await store_batch(pg_conn, batch)
+            await kafka_consumer.commit()
 
-    finally:
-        kafka_consumer.unsubscribe()
-        await kafka_consumer.stop()
+
+async def consume_batch(
+    consumer: aiokafka.AIOKafkaConsumer, timeout: int = 10 * 1000
+) -> List[UrlStatus]:
+    records = await consumer.getmany(timeout_ms=timeout)
+    batch = []
+    for msgs in records.values():
+        for msg in msgs:
+            try:
+                url_status = UrlStatus.from_json(msg.value)
+                batch.append(url_status)
+            except (TypeError, json.JSONDecodeError):
+                logger.warning("Skipping message due to wrong format: %s", msg)
+
+    return batch
+
+
+async def store_batch(connection: asyncpg.Connection, batch: List[UrlStatus]):
+    print(batch)

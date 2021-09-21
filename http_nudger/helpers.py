@@ -27,7 +27,7 @@ def create_kafka_consumer(
     key_file: Path,
     cert_file: Path,
     ca_file: Path,
-) -> AIOKafkaProducer:
+) -> AIOKafkaConsumer:
     ssl_context = create_ssl_context(
         certfile=cert_file, keyfile=key_file, cafile=ca_file
     )
@@ -41,9 +41,9 @@ def create_kafka_consumer(
     )
 
 
-async def create_postgres_connection(
+async def create_postgres_connection_pool(
     host: str, port: int, db: str, user: str, password: str
-):
-    return await asyncpg.connect(
+) -> asyncpg.Pool:
+    return await asyncpg.create_pool(
         user=user, password=password, database=db, host=host, port=port
     )
