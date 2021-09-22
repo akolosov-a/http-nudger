@@ -1,0 +1,59 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: http-nudger-monitor
+  name: http-nudger-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: http-nudger-monitor
+  template:
+    metadata:
+      labels:
+        app: http-nudger-monitor
+    spec:
+      containers:
+      - name: http-nudger-google
+        image: http-nudger:0.1.0-1
+        args:
+        - monitor
+        - https://google.com
+        envFrom:
+        - configMapRef:
+            name: aiven-kafka
+        volumeMounts:
+        - name: aiven-kafka-tls
+          mountPath: /home/http-nudger
+      - name: http-nudger-aiven
+        image: http-nudger:0.1.0-1
+        args:
+        - monitor
+        - https://aiven.io
+        envFrom:
+        - configMapRef:
+            name: aiven-kafka
+        volumeMounts:
+        - name: aiven-kafka-tls
+          mountPath: /home/http-nudger
+      - name: http-nudger-xkcd
+        image: http-nudger:0.1.0-1
+        args:
+        - monitor
+        - --period
+        - '10'
+        - --regexp
+        - ([Ee]macs|[Ss]tatistics)
+        - https://c.xkcd.com/random/comic/
+        envFrom:
+        - configMapRef:
+            name: aiven-kafka
+        volumeMounts:
+        - name: aiven-kafka-tls
+          mountPath: /home/http-nudger
+      volumes:
+      - name: aiven-kafka-tls
+        secret:
+          secretName: aiven-kafka-tls
