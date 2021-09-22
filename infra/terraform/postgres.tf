@@ -15,8 +15,9 @@ output "postgres" {
   sensitive = true
   value = {
     "hostname" = aiven_pg.http-nudger.service_host
-    "port" = aiven_pg.http-nudger.service_port
-    "username"    = aiven_pg.http-nudger.service_username
+    "port"     = aiven_pg.http-nudger.service_port
+    "username" = aiven_pg.http-nudger.service_username
     "password" = aiven_pg.http-nudger.service_password
+    "dbname"   = aiven_database.http-nudger.database_name
   }
 }

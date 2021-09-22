@@ -29,8 +29,9 @@ output "kafka" {
   sensitive = true
   value = {
     "bootstrap_servers" = aiven_kafka.http-nudger.service_uri
-    "username"    = aiven_service_user.kafka_overlord.username
-    "access_key"  = aiven_service_user.kafka_overlord.access_key
-    "access_cert" = aiven_service_user.kafka_overlord.access_cert
+    "topic_name"        = aiven_kafka_topic.url-monitor-prod.topic_name
+    "username"          = aiven_service_user.kafka_overlord.username
+    "access_key"        = aiven_service_user.kafka_overlord.access_key
+    "access_cert"       = aiven_service_user.kafka_overlord.access_cert
   }
 }
