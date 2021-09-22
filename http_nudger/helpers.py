@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 import asyncpg
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
@@ -45,5 +46,11 @@ async def create_postgres_connection_pool(
     host: str, port: int, db: str, user: str, password: str
 ) -> asyncpg.Pool:
     return await asyncpg.create_pool(
-        user=user, password=password, database=db, host=host, port=port
+        user=user,
+        password=password,
+        database=db,
+        host=host,
+        port=port,
+        min_size=3,
+        max_size=3,
     )
