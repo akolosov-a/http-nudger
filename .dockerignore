@@ -1,0 +1,13 @@
+.mypy_cache
+*.pem
+__pycache__
+*.egg-info
+.tox
+.coverage
+.terraform
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+pg_pass
+kafka.env
+postgres.env
