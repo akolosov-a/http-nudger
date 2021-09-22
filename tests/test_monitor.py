@@ -1,5 +1,5 @@
 import re
-from time import gmtime
+from datetime import datetime
 from unittest.mock import patch
 
 import pytest
@@ -8,7 +8,6 @@ from requests.exceptions import RequestException
 
 from http_nudger.monitor import url_check
 
-NOW = gmtime()
 URL = "https://google.com"
 
 
@@ -20,12 +19,13 @@ def http_response():
     return resp
 
 
-@patch("time.gmtime", return_value=NOW)
 @patch("requests.get")
-def test_url_check(requests_get_mock, _, http_response):
+def test_url_check(requests_get_mock, freezer, http_response):
+    now = datetime.utcnow()
+
     requests_get_mock.return_value = http_response
     url_status = url_check(URL, 5, None)
-    assert url_status.timestamp == NOW
+    assert url_status.timestamp == now
     assert url_status.url == URL
     assert url_status.status_code == http_response.status_code
     assert url_status.failure_reason is None
@@ -34,7 +34,7 @@ def test_url_check(requests_get_mock, _, http_response):
 
     requests_get_mock.side_effect = RequestException("Some reason")
     url_status = url_check(URL, 5, None)
-    assert url_status.timestamp == NOW
+    assert url_status.timestamp == now
     assert url_status.url == URL
     assert url_status.status_code == -1
     assert url_status.failure_reason == "Some reason"
@@ -55,6 +55,7 @@ def test_url_check_regexp_match(requests_get_mock, http_response):
     url_status = url_check(URL, 5, regexp)
     assert url_status.regexp == regexp.pattern
     assert url_status.regexp_matched is False
+
 
 @patch("requests.get")
 def test_url_check_regexp_not_match(requests_get_mock, http_response):

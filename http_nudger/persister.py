@@ -57,7 +57,7 @@ async def consume_batch(
             try:
                 url_status = UrlStatus.from_json(msg.value)
                 batch.append(url_status)
-            except (TypeError, json.JSONDecodeError):
+            except (TypeError, json.JSONDecodeError, ValueError):
                 logger.warning("Skipping message due to wrong format: %s", msg)
 
     return batch

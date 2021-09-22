@@ -1,10 +1,10 @@
-from time import gmtime
+from datetime import datetime
 
 from http_nudger.url_status import UrlStatus
 
 
 def test_url_status():
-    timestamp = gmtime()
+    timestamp = datetime.utcnow()
 
     status1 = UrlStatus(timestamp, "https://google.com", 200, "", 0.5, None, False)
     status1_json = status1.to_json()

@@ -2,8 +2,9 @@ import asyncio
 import logging
 import re
 from pathlib import Path
-from time import gmtime, perf_counter
+from time import perf_counter
 from typing import Optional
+from datetime import datetime
 
 import requests
 from aiokafka import AIOKafkaProducer
@@ -60,7 +61,7 @@ async def url_status_checker(
 
 
 def url_check(url: str, timeout: int, regexp: Optional[re.Pattern]) -> UrlStatus:
-    timestamp = gmtime()
+    timestamp = datetime.utcnow()
     resp = None
     request_failure = None
     regexp_str = regexp.pattern if regexp else None
