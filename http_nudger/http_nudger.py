@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import re
+from typing import Optional
 
 import click
 
@@ -21,7 +22,7 @@ def cli(debug):
     )
 
 
-def compile_regexp(ctx, param, value) -> re.Pattern:
+def compile_regexp(ctx, param, value) -> Optional[re.Pattern]:
     if not value:
         return None
 
@@ -57,30 +58,36 @@ def compile_regexp(ctx, param, value) -> re.Pattern:
     type=click.STRING,
     help="Kafka bootstrap servers list",
     required=True,
+    envvar="KAFKA_BOOTSTRAP_SERVERS",
 )
 @click.option(
     "--kafka-topic",
     type=click.STRING,
     help="Kafka topic",
     required=True,
+    envvar="KAFKA_TOPIC",
 )
 @click.option(
     "--kafka-key",
     type=click.Path(exists=True),
     help="Kafka access key file",
-    required=True,
+    show_default=True,
+    default="./kafka-key.pem",
 )
 @click.option(
     "--kafka-cert",
     type=click.Path(exists=True),
     help="Kafka access certificate file",
-    required=True,
+    show_default=True,
+    default="./kafka-cert.pem",
 )
 @click.option(
     "--kafka-ca",
     type=click.Path(exists=True),
     help="Kafka root CA cert file",
     required=True,
+    show_default=True,
+    default="./ca.pem",
 )
 # pylint: disable-msg=too-many-arguments
 def monitor(**kwargs):
@@ -94,58 +101,79 @@ def monitor(**kwargs):
     type=click.STRING,
     help="Kafka bootstrap servers list",
     required=True,
+    envvar="KAFKA_BOOTSTRAP_SERVERS",
 )
 @click.option(
     "--kafka-topic",
     type=click.STRING,
     help="Kafka topic",
     required=True,
+    envvar="KAFKA_TOPIC",
 )
 @click.option(
     "--kafka-key",
     type=click.Path(exists=True),
     help="Kafka access key file",
-    required=True,
+    show_default=True,
+    default="./kafka-key.pem",
 )
 @click.option(
     "--kafka-cert",
     type=click.Path(exists=True),
     help="Kafka access certificate file",
-    required=True,
+    show_default=True,
+    default="./kafka-cert.pem",
 )
 @click.option(
     "--kafka-ca",
     type=click.Path(exists=True),
     help="Kafka root CA cert file",
     required=True,
+    show_default=True,
+    default="./ca.pem",
 )
 @click.option(
     "--kafka-consumer-group",
     type=click.STRING,
     help="Kafka consumer group to join",
+    show_default=True,
     default="http-nudger-url-statuses",
 )
 @click.option(
-    "--postgres-host", type=click.STRING, help="Postgres hostname", default="localhost"
+    "--postgres-host",
+    type=click.STRING,
+    help="Postgres hostname",
+    default="localhost",
+    envvar="PG_HOST",
 )
-@click.option("--postgres-port", type=click.INT, help="Postgres port", default=5432)
+@click.option(
+    "--postgres-port",
+    type=click.INT,
+    help="Postgres port",
+    default=5432,
+    envvar="PG_PORT",
+)
 @click.option(
     "--postgres-db",
     type=click.STRING,
     help="Postgres database",
-    required=True,
+    show_default=True,
+    default="http-nudger",
+    envvar="PG_DB",
 )
 @click.option(
     "--postgres-user",
     type=click.STRING,
     help="Postgres username",
     required=True,
+    envvar="PG_USER",
 )
 @click.option(
     "--postgres-password",
     type=click.STRING,
     help="Postgres password",
     required=True,
+    envvar="PG_PASSWORD",
 )
 def persister(**kwargs):
     """Run process for storing URL checks to the given database tables"""
