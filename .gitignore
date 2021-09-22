@@ -8,3 +8,5 @@ __pycache__
 .terraform.lock.hcl
 terraform.tfstate*
 pg_pass
+kafka.env
+postgres.env
