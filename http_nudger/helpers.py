@@ -1,3 +1,7 @@
+"""
+This module contains various helpers for communicating with Kafka
+and PostgreSQL
+"""
 from pathlib import Path
 from typing import Optional
 

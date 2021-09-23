@@ -1,3 +1,8 @@
+"""
+Monitor module contains part of the http-nudger which performs
+periodical checks of the given URL and produces metrics to the given
+Kafka topic
+"""
 import asyncio
 import logging
 import re
@@ -27,7 +32,7 @@ async def monitor_loop(
     kafka_key: Path,
     kafka_cert: Path,
     kafka_ca: Path,
-):
+) -> None:
     url_status_queue: asyncio.Queue = asyncio.Queue()
     async with create_kafka_producer(
         kafka_bootstrap_servers,
@@ -50,7 +55,7 @@ async def url_status_checker(
     timeout: int,
     regexp: Optional[re.Pattern],
     queue: asyncio.Queue,
-):
+) -> None:
     while True:
         logger.info("Checking URL %s...", url)
         url_status = url_check(url, timeout, regexp)
@@ -90,7 +95,7 @@ def url_check(url: str, timeout: int, regexp: Optional[re.Pattern]) -> UrlStatus
 
 async def url_status_producer(
     producer: AIOKafkaProducer, topic: str, queue: asyncio.Queue
-):
+) -> None:
     while True:
         url_status = await queue.get()
         logger.debug("Starting processing URL status: %s", url_status)

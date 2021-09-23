@@ -16,6 +16,7 @@ from .url_status import UrlStatus
 logger = logging.getLogger(__name__)
 
 
+# pylint: disable-msg=too-many-arguments
 async def persister_loop(
     kafka_bootstrap_servers: str,
     kafka_topic: str,
@@ -28,7 +29,7 @@ async def persister_loop(
     postgres_db: str,
     postgres_user: str,
     postgres_password: str,
-):
+) -> None:
     kafka_consumer = create_kafka_consumer(
         kafka_bootstrap_servers,
         kafka_consumer_group,
@@ -76,7 +77,7 @@ async def consume_batch(
     return batch
 
 
-async def create_tables(conn: asyncpg.Connection):
+async def create_tables(conn: asyncpg.Connection) -> None:
     await conn.execute(
         """
         CREATE TABLE IF NOT EXISTS url_statuses(
@@ -93,7 +94,7 @@ async def create_tables(conn: asyncpg.Connection):
     )
 
 
-async def store_batch(conn: asyncpg.Connection, batch: List[UrlStatus]):
+async def store_batch(conn: asyncpg.Connection, batch: List[UrlStatus]) -> None:
     async with conn.transaction():
         # TODO: for DB efficency on higher throughputs this should be
         # rewritten to use single multi-row INSERT

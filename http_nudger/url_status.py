@@ -1,3 +1,6 @@
+"""
+This module contains functions and classes to work with URL statuses
+"""
 import json
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -6,6 +9,10 @@ from typing import AnyStr, Optional
 
 @dataclass
 class UrlStatus:
+    """
+    UrlStatus is the data class describing a result of the URL check
+    """
+
     timestamp: datetime
     url: str
     status_code: int
