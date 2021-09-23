@@ -63,8 +63,8 @@ The persister process::
                                     ./ca.pem;required]
     --kafka-consumer-group TEXT     Kafka consumer group to join  [default:
                                     http-nudger-url-statuses]
-    --postgres-host TEXT            Postgres hostname
-    --postgres-port INTEGER         Postgres port
+    --postgres-host TEXT            Postgres hostname  [default: localhost]
+    --postgres-port INTEGER         Postgres port  [default: 5432]
     --postgres-db TEXT              Postgres database  [default: http-nudger]
     --postgres-user TEXT            Postgres username  [required]
     --postgres-password TEXT        Postgres password  [required]
@@ -76,7 +76,7 @@ The provided infrastructure deployment scripts can be used to start
 the ``http-nudger`` monitoring.
 
 Create Kafka and PostgreSQL instances using `Aiven service
-<https://aiven.io/>_`. Terraform tool is required::
+<https://aiven.io/>`_. Terraform tool is required::
 
   $ export TF_VAR_aiven_api_token=<YOUR AIVEN API TOKEN>
   $ export TF_VAR_aiven_project_name=<YOUR AIVEN PROJECT NAME>
@@ -87,10 +87,12 @@ connection information will be created: ``kafka.env``,
 ``postgres.env``, ``ca.pem``, ``kafka-key.pem``, ``kafka-cert.pem``.
 
 To run ``monitor`` manually::
+  
   $ export $(cat kafka.env)
   $ http-nudger monitor --regexp '[Mm]ath' https://c.xkcd.com/random/comic/
 
 To run ``persister`` manually::
+  
   $ export $(cat kafka.env postgres.env)
   $ http-nudger persister
 
@@ -98,5 +100,6 @@ To deploy ``http-nudger`` in Kubernetes the deployment manifests
 provided in ``infra/k8s`` can also be used. To deploy everything with
 needed secrets and configuration maps (don't forget to publish the
 ``http-nudger`` image)::
+  
   $ export KUBECONFIG=<PATH TO YOUR KUBECONFIG>
   $ make deploy_k8s

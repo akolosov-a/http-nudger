@@ -144,12 +144,14 @@ def monitor(**kwargs):
     type=click.STRING,
     help="Postgres hostname",
     default="localhost",
+    show_default=True,
     envvar="PG_HOST",
 )
 @click.option(
     "--postgres-port",
     type=click.INT,
     help="Postgres port",
+    show_default=True,
     default=5432,
     envvar="PG_PORT",
 )
