@@ -55,6 +55,6 @@ async def create_postgres_connection_pool(
         database=db,
         host=host,
         port=port,
-        min_size=3,
-        max_size=3,
+        min_size=1,
+        max_size=1,
     )

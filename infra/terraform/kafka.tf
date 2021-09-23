@@ -19,10 +19,12 @@ resource "aiven_kafka_topic" "url-monitor-prod" {
   replication  = 2
 }
 
-resource "aiven_service_user" "kafka_overlord" {
+resource "aiven_kafka_topic" "url-monitor-test" {
   project      = data.aiven_project.http-nudger.project
   service_name = aiven_kafka.http-nudger.service_name
-  username     = "kafka_overlord"
+  topic_name   = "url-monitor-test"
+  partitions   = 1
+  replication  = 2
 }
 
 output "kafka" {
@@ -30,7 +32,8 @@ output "kafka" {
   value = {
     "bootstrap_servers" = aiven_kafka.http-nudger.service_uri
     "topic_name"        = aiven_kafka_topic.url-monitor-prod.topic_name
-    "access_key"        = aiven_service_user.kafka_overlord.access_key
-    "access_cert"       = aiven_service_user.kafka_overlord.access_cert
+    "test_topic_name"   = aiven_kafka_topic.url-monitor-test.topic_name
+    "access_key"        = aiven_kafka.http-nudger.kafka[0].access_key
+    "access_cert"       = aiven_kafka.http-nudger.kafka[0].access_cert
   }
 }

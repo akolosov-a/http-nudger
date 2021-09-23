@@ -70,8 +70,8 @@ The persister process::
     --postgres-password TEXT        Postgres password  [required]
     --help                          Show this message and exit.
 
-Running
--------
+Infrastructure
+--------------
 The provided infrastructure deployment scripts can be used to start
 the ``http-nudger`` monitoring.
 
@@ -86,10 +86,25 @@ After infrastructure creation the next files with the required
 connection information will be created: ``kafka.env``,
 ``postgres.env``, ``ca.pem``, ``kafka-key.pem``, ``kafka-cert.pem``.
 
+Testing
+-------
+Tox tool is used for running tests. Install it and other development tools with::
+  $ pip install -r dev-requirements.txt
+
+To run unit tests run::
+  $ make test
+
+To run end-to-end tests run (it will trigger infrastructure creation)::
+  $ export TF_VAR_aiven_api_token=<YOUR AIVEN API TOKEN>
+  $ export TF_VAR_aiven_project_name=<YOUR AIVEN PROJECT NAME>
+  $ make e2e
+
+Running
+-------
 To run ``monitor`` manually::
   
   $ export $(cat kafka.env)
-  $ http-nudger monitor --regexp '[Mm]ath' https://c.xkcd.com/random/comic/
+  $ env http-nudger monitor --regexp '[Mm]ath' https://c.xkcd.com/random/comic/
 
 To run ``persister`` manually::
   
