@@ -118,3 +118,15 @@ needed secrets and configuration maps (don't forget to publish the
   
   $ export KUBECONFIG=<PATH TO YOUR KUBECONFIG>
   $ make deploy_k8s
+
+To Do
+-----
+- More flexible monitor configuration with ability to run many checks in one monitor process.
+- Each monitoring process should also set the ID and some information
+  on the availability zone it is running in.
+- Maintain a DB table with the latest availability statuse per each
+  configured URL calculated using the checks gathered in different
+  AZs.
+- Add a background web-server to each process to make it possible to
+  collect readiness, healthness statuses and metrics when deployed to
+  a Kubernetes environment.
